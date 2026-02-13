@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OldTube - La Máquina del Tiempo</title>
     <style>
         :root {
@@ -32,7 +33,6 @@
         .tendencias { padding: 10px; text-align: center; background: var(--bg-color); }
         .tag { display: inline-block; padding: 5px 12px; background: #ddd; margin: 3px; border-radius: 15px; font-size: 12px; cursor: pointer; color: #333; }
 
-        .welcome-box { text-align: center; padding: 20px; }
         #video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; padding: 20px; }
         
         .video-card { background: var(--header-bg); border: 1px solid var(--border-color); padding: 10px; cursor: pointer; }
@@ -50,6 +50,20 @@
         .video-info { background: #222; padding: 15px; margin-top: -5px; }
         .close-btn { position: fixed; top: 10px; right: 30px; color: white; font-size: 45px; cursor: pointer; z-index: 1100; }
         iframe { width: 100%; aspect-ratio: 16/9; border: none; background: #000; }
+
+        /* ESTILOS PARA MÓVIL (Responsivo Retro) */
+        @media (max-width: 768px) {
+            header { flex-direction: column; height: auto; padding: 10px; }
+            .search-area { width: 100%; margin: 10px 0; }
+            .logo { height: 35px; margin-bottom: 5px; }
+            #video-grid { grid-template-columns: 1fr; padding: 10px; }
+            .player-container { padding: 5px; margin: 0; }
+            .main-content { min-width: 100%; }
+            .side-videos { border-left: none; padding-left: 0; margin-top: 20px; }
+            .video-card h3 { height: auto; font-size: 16px; }
+            .btn-theme { width: 100%; margin-bottom: 5px; }
+            .close-btn { right: 15px; top: 5px; font-size: 35px; }
+        }
     </style>
 </head>
 <body onload="inicio()">
@@ -63,17 +77,17 @@
         </div>
         <div id="autocomplete-results"></div>
     </div>
-    <div style="display: flex; flex-direction: column;">
+    <div style="display: flex; flex-direction: column; width: auto;">
         <button class="btn-theme" onclick="cambiarModo()" id="btnModo">Modo: OG</button>
-        <button class="btn-shorts" onclick="alert('¡ESTO ES EL YOUTUBE ANTIGUO, AQUÍ NO TIENES SHORTS BASURA!')">Shorts</button>
+        <button class="btn-shorts" onclick="alert('¡ESTO ES EL YOUTUBE ANTIGUO, AQUÍ NO HAY SHORTS!')">Shorts</button>
     </div>
 </header>
 
 <div class="filters">
-    <label>Desde: </label><input type="number" id="yearStart" value="2006" style="width: 65px;" onchange="buscar(true)">
-    <label> Hasta: </label><input type="number" id="yearEnd" value="2014" style="width: 65px;" onchange="buscar(true)">
-    <select id="idioma" style="margin-left: 10px; padding: 2px;" onchange="buscar(true)">
-        <option value="">Cualquier idioma</option>
+    <label>Desde: </label><input type="number" id="yearStart" value="2006" style="width: 60px;" onchange="buscar(true)">
+    <label> Hasta: </label><input type="number" id="yearEnd" value="2014" style="width: 60px;" onchange="buscar(true)">
+    <select id="idioma" style="margin-left: 5px;" onchange="buscar(true)">
+        <option value="">Idioma</option>
         <option value="es">Español</option>
         <option value="en">Inglés</option>
     </select>
@@ -82,13 +96,7 @@
 <div class="tendencias">
     <span class="tag" onclick="tagSearch('Minecraft 2012')">Minecraft 2012</span>
     <span class="tag" onclick="tagSearch('Rubius 2013')">Rubius Clásico</span>
-    <span class="tag" onclick="tagSearch('Música 2010')">Música 2010</span>
     <span class="tag" onclick="tagSearch('Willyrex 2011')">Willyrex</span>
-</div>
-
-<div class="welcome-box" id="welcome">
-    <h2>Bienvenido a la Época Dorada</h2>
-    <p>Navega para viajar en el tiempo a la época dorada de internet.</p>
 </div>
 
 <main id="video-grid"></main>
@@ -102,9 +110,9 @@
             <div id="lista-comentarios" style="margin-top:20px; background:#111; padding:15px;"></div>
         </div>
         <div class="side-videos" id="side-scroll">
-            <h4 style="margin-top:0;">Más para ti de esta época:</h4>
+            <h4 style="margin-top:0;">Recomendados de la época:</h4>
             <div id="lista-sugerencias"></div>
-            <button onclick="cargarSugerenciasInfinitas()" style="width:100%; padding:10px; cursor:pointer; background:#444; color:white; border:none; margin-top:10px;">Cargar más...</button>
+            <button onclick="cargarSugerenciasInfinitas()" style="width:100%; padding:10px; cursor:pointer; background:#444; color:white; border:none;">Cargar más</button>
         </div>
     </div>
 </div>
@@ -116,7 +124,6 @@
     let currentId = "";
 
     function inicio() { buscar(true); }
-
     function tagSearch(t) { document.getElementById('query').value = t; buscar(true); }
 
     async function autocompletar() {
@@ -143,12 +150,11 @@
         const lang = document.getElementById('idioma').value;
         const grid = document.getElementById('video-grid');
         
-        if(nueva) { nextToken = ""; grid.innerHTML = "<p style='grid-column:1/-1; text-align:center;'>Viajando al pasado...</p>"; }
+        if(nueva) { nextToken = ""; grid.innerHTML = "<p style='grid-column:1/-1; text-align:center;'>Cargando el pasado...</p>"; }
 
         const searchTerm = queryInput || (lang === 'es' ? 'popular viral' : 'viral classic');
         const q = `${searchTerm} after:${start}-01-01 before:${end}-12-31`;
-        let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=20&q=${encodeURIComponent(q)}&type=video&key=${API_KEY}${nextToken ? '&pageToken='+nextToken : ''}`;
-        
+        let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=15&q=${encodeURIComponent(q)}&type=video&key=${API_KEY}${nextToken ? '&pageToken='+nextToken : ''}`;
         if(lang) url += `&relevanceLanguage=${lang}`;
 
         try {
@@ -157,58 +163,39 @@
             nextToken = data.nextPageToken;
             if(nueva) grid.innerHTML = "";
 
-            const ids = data.items.map(i => i.id.videoId).join(',');
-            const resExtra = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics&id=${ids}&key=${API_KEY}`);
-            const dataExtra = await resExtra.json();
-
-            data.items.forEach((item, index) => {
+            data.items.forEach(item => {
                 const id = item.id.videoId;
                 const snip = item.snippet;
-                const durRaw = dataExtra.items[index].contentDetails.duration;
-                const dur = durRaw.replace('PT','').replace('H',':').replace('M',':').replace('S','');
-                const views = Number(dataExtra.items[index].statistics.viewCount).toLocaleString();
-
                 grid.innerHTML += `
                     <div class="video-card" onclick="verVideo('${id}', '${snip.title.replace(/'/g, "")}', '${snip.channelTitle}')">
-                        <div class="thumb-container">
-                            <img src="${snip.thumbnails.high.url}">
-                            <span class="duration">${dur}</span>
-                        </div>
+                        <img src="${snip.thumbnails.high.url}">
                         <h3>${snip.title}</h3>
                         <p><strong>${snip.channelTitle}</strong></p>
-                        <p>${views} vistas • ${new Date(snip.publishedAt).toLocaleDateString()}</p>
+                        <p>${new Date(snip.publishedAt).toLocaleDateString()}</p>
                     </div>`;
             });
-            if(nextToken) {
-                document.getElementById('btnMasMain')?.remove();
-                grid.innerHTML += `<button id="btnMasMain" onclick="buscar(false)" style="grid-column:1/-1; padding:15px; cursor:pointer; margin-top:20px; width:100%;">Cargar más...</button>`;
-            }
         } catch(e) { console.error(e); }
     }
 
     async function verVideo(id, titulo, canal) {
-        currentId = id; nextSideToken = "";
+        currentId = id;
         const modal = document.getElementById('player-modal');
         modal.style.display = "block";
         document.body.style.overflow = "hidden";
-        // Usamos dominio sin cookies y modestbranding para una experiencia limpia
-        document.getElementById('video-espacio').innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&origin=${window.location.origin}" allowfullscreen></iframe>`;
-        document.getElementById('detalles-video').innerHTML = `<h2 style="color:white; font-size:18px; margin:0;">${titulo}</h2><p style="color:#3ea6ff; margin:5px 0;">${canal}</p><a href="https://www.youtube.com/watch?v=${id}" target="_blank" style="color:#cc0000; font-size:11px;">[ VER EN YOUTUBE ORIGINAL SI HAY ERROR ]</a>`;
+        document.getElementById('video-espacio').innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1" allowfullscreen></iframe>`;
+        document.getElementById('detalles-video').innerHTML = `<h2 style="color:white; font-size:18px;">${titulo}</h2><p style="color:#3ea6ff;">${canal}</p>`;
         document.getElementById('lista-sugerencias').innerHTML = "";
         cargarSugerenciasInfinitas();
         cargarComentarios(id);
     }
 
     async function cargarSugerenciasInfinitas() {
-        const queryInput = document.getElementById('query').value;
         const start = document.getElementById('yearStart').value;
         const end = document.getElementById('yearEnd').value;
         const lang = document.getElementById('idioma').value;
+        const q = `after:${start}-01-01 before:${end}-12-31`;
         
-        const searchTerm = queryInput || (lang === 'es' ? 'popular viral' : 'viral classic');
-        const q = `${searchTerm} after:${start}-01-01 before:${end}-12-31`;
-        
-        let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=15&q=${encodeURIComponent(q)}&type=video&key=${API_KEY}${nextSideToken ? '&pageToken='+nextSideToken : ''}`;
+        let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=${encodeURIComponent(q)}&type=video&key=${API_KEY}${nextSideToken ? '&pageToken='+nextSideToken : ''}`;
         if(lang) url += `&relevanceLanguage=${lang}`;
 
         try {
@@ -218,16 +205,15 @@
             const lista = document.getElementById('lista-sugerencias');
 
             data.items.forEach(item => {
-                const lowerTitle = item.snippet.title.toLowerCase();
-                // Filtro para evitar el video actual y bloquear SHORTS (por el título o etiquetas)
-                if(item.id.videoId === currentId || lowerTitle.includes("#shorts") || lowerTitle.includes("shorts")) return;
+                const lowT = item.snippet.title.toLowerCase();
+                if(item.id.videoId === currentId || lowT.includes("#shorts") || lowT.includes("shorts")) return;
 
                 lista.innerHTML += `
                     <div style="display:flex; gap:10px; margin-bottom:15px; cursor:pointer;" onclick="verVideo('${item.id.videoId}', '${item.snippet.title.replace(/'/g, "")}', '${item.snippet.channelTitle}')">
-                        <img src="${item.snippet.thumbnails.default.url}" style="width:110px; border:1px solid #333; aspect-ratio:16/9; object-fit:cover;">
+                        <img src="${item.snippet.thumbnails.default.url}" style="width:110px; aspect-ratio:16/9; object-fit:cover;">
                         <div style="flex:1;">
-                            <p style="font-size:11px; margin:0; font-weight:bold; color:white; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${item.snippet.title}</p>
-                            <p style="font-size:10px; color:#aaa; margin-top:3px;">${item.snippet.channelTitle}</p>
+                            <p style="font-size:11px; margin:0; font-weight:bold; color:white;">${item.snippet.title}</p>
+                            <p style="font-size:10px; color:#aaa;">${item.snippet.channelTitle}</p>
                         </div>
                     </div>`;
             });
@@ -236,15 +222,15 @@
 
     async function cargarComentarios(id) {
         const lista = document.getElementById('lista-comentarios');
-        lista.innerHTML = "<h4>Comentarios antiguos:</h4>";
+        lista.innerHTML = "<h4>Comentarios:</h4>";
         try {
-            const res = await fetch(`https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${id}&maxResults=10&key=${API_KEY}`);
+            const res = await fetch(`https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${id}&maxResults=8&key=${API_KEY}`);
             const data = await res.json();
             data.items.forEach(c => {
                 const comm = c.snippet.topLevelComment.snippet;
                 lista.innerHTML += `<div style="border-bottom:1px solid #333; padding:10px; font-size:13px; color:white;"><b>${comm.authorDisplayName}</b>: ${comm.textDisplay}</div>`;
             });
-        } catch(e) { lista.innerHTML += "<p style='color:#777; font-size:12px;'>Comentarios no disponibles.</p>"; }
+        } catch(e) { lista.innerHTML += "<p style='color:#777;'>Comentarios desactivados.</p>"; }
     }
 
     function cerrarPlayer() { document.getElementById('player-modal').style.display = "none"; document.body.style.overflow = "auto"; document.getElementById('video-espacio').innerHTML = ""; }
@@ -258,7 +244,6 @@
             body.setAttribute('data-theme', 'dark'); btn.innerText = "Modo: Oscuro";
         }
     }
-    document.getElementById('query').addEventListener('keypress', (e) => { if (e.key === 'Enter') buscar(true); });
 </script>
 </body>
 </html>
